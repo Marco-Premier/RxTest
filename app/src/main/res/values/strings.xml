@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Swrve_Programming_Test</string>
+    <string name="activity_main">Url Form Activity</string>
+    <!-- url form view -->
+    <string name="ufw_et_url_hint">Insert URL</string>
+    <string name="ufw_btn_download">DOWNLOAD</string>
+</resources>
