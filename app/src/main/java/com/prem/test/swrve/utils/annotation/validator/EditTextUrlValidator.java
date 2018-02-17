@@ -2,6 +2,9 @@ package com.prem.test.swrve.utils.annotation.validator;
 
 import android.util.Log;
 
+import com.prem.test.swrve.model.result.CheckUrlResult;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Predicate;
 import io.reactivex.Observable;
 
@@ -11,27 +14,12 @@ import io.reactivex.Observable;
 
 public class EditTextUrlValidator {
 
-    public Observable<String> isValidUrl(String url){
-        return Observable.defer(() -> {
-            try {
-                return Observable.just(checkValue(url));
-            } catch (Exception e) {
-                return Observable.error(e);
-            }
-        });
-        /*return Observable.just(url)
-                .filter(new Predicate<String>() {
-                    @Override
-                    public boolean test(String s) throws Exception {
-                        Log.i("PREM","return false, string: "+s);
-                        return false;
-                    }
+    public Observable<Boolean> isValidUrl(String url){
 
-                });*/
+        String regex = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*.(?:jpg|gif|png)\\/?$";
+        return Observable.just(url).map(stringUrl -> (stringUrl.length() > 0 && stringUrl.matches(regex)));
+
     }
 
-    public String checkValue(String url) throws Exception{
-        return "true";
-    }
 
 }

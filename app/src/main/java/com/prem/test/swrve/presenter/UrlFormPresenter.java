@@ -1,14 +1,19 @@
 package com.prem.test.swrve.presenter;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.prem.test.swrve.model.UrlFormModel;
 import com.prem.test.swrve.model.action.BaseAction;
 import com.prem.test.swrve.model.action.CheckUrlAction;
+import com.prem.test.swrve.model.action.DownloadImageAction;
+import com.prem.test.swrve.model.state.UrlFormState;
 import com.prem.test.swrve.view.contract.UrlFormView;
 import com.prem.test.swrve.view.controller.UrlFormController;
 import com.prem.test.swrve.view.event.CheckUrlEvent;
+import com.prem.test.swrve.view.event.DownloadImageEvent;
 import com.prem.test.swrve.view.event.UiEvent;
 
 import io.reactivex.Observable;
@@ -38,9 +43,20 @@ public class UrlFormPresenter extends BasePresenter<UrlFormView> {
         super.attachView(view);
 
         model = new UrlFormModel(getActions());
-        /*disposables.add(model.getState().subscribe(model -> {
-            Log.i("PREM","MODEL RICEVUTO!");
-        }));*/
+        disposables.add(model.getState().subscribe(model -> {
+            if(model.getIsValidUrl()) {
+                ifViewAttached(ui -> ui.enableDownaloButton());
+                ifViewAttached(ui -> ui.hideInvalidUrlError());
+            }else{
+                ifViewAttached(ui -> ui.disableDownaloButton());
+                ifViewAttached(ui -> ui.showInvalidUrlError());
+
+            }
+            if(null != model.getImagePath()){
+                Bitmap bitmap = BitmapFactory.decodeFile(model.getImagePath());
+                ifViewAttached(ui -> ui.displayImage(bitmap));
+            }
+        }));
 
     }
 
@@ -55,7 +71,6 @@ public class UrlFormPresenter extends BasePresenter<UrlFormView> {
     private Observable<BaseAction> getActions(){
         return uiEvents.compose(new ObservableTransformer<UiEvent, BaseAction>(){
 
-            //returns new observable that can emit distinct values from source observable
             @Override
             public ObservableSource<BaseAction> apply(Observable<UiEvent> upstream) {
                 return upstream.map(new Function<UiEvent, BaseAction>() {
@@ -63,6 +78,8 @@ public class UrlFormPresenter extends BasePresenter<UrlFormView> {
                     public BaseAction apply(UiEvent uiEvent) throws Exception {
                         if(uiEvent instanceof CheckUrlEvent)
                             return new CheckUrlAction(((CheckUrlEvent)uiEvent).getUrl());
+                        if(uiEvent instanceof DownloadImageEvent)
+                            return new DownloadImageAction(((DownloadImageEvent)uiEvent).getUrl());
                         return null;
                     }
                 });

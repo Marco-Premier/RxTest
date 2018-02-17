@@ -9,20 +9,29 @@
         layout="@layout/toolbar_elevation" />
 
     <android.support.design.widget.TextInputLayout
+        android:id="@+id/tilEmail"
         style="@style/tilDefaultStyle"
         android:layout_below="@+id/toolbar">
 
         <EditText
             android:id="@+id/etEmail"
-            android:inputType="textWebEmailAddress"
+            android:inputType="textUri"
             style="@style/etDefaultStyle"
             android:hint="@string/ufw_et_url_hint" />
 
     </android.support.design.widget.TextInputLayout>
 
+    <ImageView
+        android:id="@+id/ivImage"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@+id/tilEmail"/>
+
     <Button
+        android:id="@+id/btnDownload"
         android:layout_alignParentBottom="true"
         style="@style/btnDefaultStyle"
+        android:enabled="false"
         android:text="@string/ufw_btn_download"/>
 
 </RelativeLayout>
