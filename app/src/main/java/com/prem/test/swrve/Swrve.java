@@ -16,12 +16,18 @@ public class Swrve extends Application {
 
     //Fields
     private static Context context;
+    private static RealmConfiguration realmConfig;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         context = getApplicationContext();
+        Realm.init(context);
+        realmConfig = new RealmConfiguration.Builder()
+                .schemaVersion(1)
+                .build();
+        Realm.setDefaultConfiguration(realmConfig);
 
     }
 

@@ -15,6 +15,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.bluelinelabs.conductor.Controller;
+import com.bluelinelabs.conductor.RouterTransaction;
+import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 import com.prem.test.swrve.R;
@@ -44,9 +46,10 @@ public class UrlFormController extends BaseController<UrlFormView,UrlFormPresent
 
     private Unbinder unbinder;
 
-    @BindView(R.id.tilEmail) protected TextInputLayout tilEmail;
+    @BindView(R.id.tilUrl) protected TextInputLayout tilUrl;
+    @BindView(R.id.btnGoToUrlList) protected Button btnGoToUrlList;
     @BindView(R.id.ivImage) protected ImageView ivImage;
-    @Font(Font.Fonts.ROMAN) @BindView(R.id.etEmail) protected EditText etEmail;
+    @Font(Font.Fonts.ROMAN) @BindView(R.id.etUrl) protected EditText etUrl;
     @Font(Font.Fonts.LIGHT) @BindView(R.id.btnDownload) protected Button btnDownload;
 
     @NonNull
@@ -54,6 +57,12 @@ public class UrlFormController extends BaseController<UrlFormView,UrlFormPresent
     protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
         View rootView = inflater.inflate(R.layout.url_form_view, container, false);
         unbinder = ButterKnife.bind(this, rootView);
+        RxView.clicks(btnGoToUrlList)
+                .subscribe(aVoid -> {
+                    getRouter().pushController(
+                            RouterTransaction.with(new UrlListController())
+                                    .pushChangeHandler(new HorizontalChangeHandler(DEFAULT_PUSH_TRANSITION_DURATION)));
+                });
         return rootView;
     }
 
@@ -79,11 +88,11 @@ public class UrlFormController extends BaseController<UrlFormView,UrlFormPresent
     }
 
     private Observable<UiEvent> setupEvents(){
-        Observable<CheckUrlEvent> checkUrlEvent = RxTextView.afterTextChangeEvents(etEmail)
-                .map(text -> new CheckUrlEvent(etEmail.getText().toString()));
+        Observable<CheckUrlEvent> checkUrlEvent = RxTextView.afterTextChangeEvents(etUrl)
+                .map(text -> new CheckUrlEvent(etUrl.getText().toString()));
 
         Observable<DownloadImageEvent> downloadImageEvent = RxView.clicks(btnDownload)
-                .map(__ -> new DownloadImageEvent(etEmail.getText().toString()));
+                .map(__ -> new DownloadImageEvent(etUrl.getText().toString()));
 
         return Observable.merge(checkUrlEvent,downloadImageEvent);
     }
@@ -100,16 +109,17 @@ public class UrlFormController extends BaseController<UrlFormView,UrlFormPresent
 
     @Override
     public void showInvalidUrlError() {
-        tilEmail.setError(getActivity().getResources().getString(R.string.ufw_et_url_error));
+        tilUrl.setError(getActivity().getResources().getString(R.string.ufw_et_url_error));
     }
 
     @Override
     public void hideInvalidUrlError() {
-        tilEmail.setError(null);
+        tilUrl.setError(null);
     }
 
     @Override
     public void displayImage(Bitmap bitmap) {
         ivImage.setImageBitmap(bitmap);
     }
+
 }

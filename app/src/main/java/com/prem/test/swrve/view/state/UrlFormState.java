@@ -1,6 +1,4 @@
-package com.prem.test.swrve.model.state;
-
-import retrofit2.http.Url;
+package com.prem.test.swrve.view.state;
 
 /**
  * Created by prem on 14/02/2018.

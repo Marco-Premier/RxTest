@@ -5,4 +5,5 @@
     <string name="ufw_et_url_hint">Insert a valid URL</string>
     <string name="ufw_et_url_error">Please insert a valid URL</string>
     <string name="ufw_btn_download">DOWNLOAD</string>
+    <string name="ufw_btn_go_to_list">Vai alla lista</string>
 </resources>

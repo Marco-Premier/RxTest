@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.prem.test.swrve.Swrve;
+import com.prem.test.swrve.model.persistent.dao.UrlDao;
 
 import org.reactivestreams.Subscriber;
 
@@ -32,6 +33,7 @@ public class FileManager {
         return new Function<Response<ResponseBody>, Observable<File>>() {
             @Override
             public Observable<File> apply(Response<ResponseBody> responseBodyResponse) throws Exception {
+                UrlDao.saveUrl(responseBodyResponse.raw().networkResponse().request().url().toString());
                 return saveToDiskRx(responseBodyResponse);
             }
         };

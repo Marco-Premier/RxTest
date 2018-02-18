@@ -2,16 +2,13 @@ package com.prem.test.swrve.presenter;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.prem.test.swrve.model.UrlFormModel;
 import com.prem.test.swrve.model.action.BaseAction;
 import com.prem.test.swrve.model.action.CheckUrlAction;
 import com.prem.test.swrve.model.action.DownloadImageAction;
-import com.prem.test.swrve.model.state.UrlFormState;
+import com.prem.test.swrve.view.state.UrlFormState;
 import com.prem.test.swrve.view.contract.UrlFormView;
-import com.prem.test.swrve.view.controller.UrlFormController;
 import com.prem.test.swrve.view.event.CheckUrlEvent;
 import com.prem.test.swrve.view.event.DownloadImageEvent;
 import com.prem.test.swrve.view.event.UiEvent;
@@ -20,8 +17,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.disposables.Disposables;
 import io.reactivex.functions.Function;
 
 /**

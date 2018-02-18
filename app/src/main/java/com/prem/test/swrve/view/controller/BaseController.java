@@ -10,4 +10,7 @@ import com.prem.test.swrve.view.contract.BaseView;
  */
 
 public abstract class BaseController<V extends MvpView, T extends MvpPresenter<V>> extends MvpController<V,T> implements BaseView{
+
+    protected final static int DEFAULT_PUSH_TRANSITION_DURATION = 220;
+
 }

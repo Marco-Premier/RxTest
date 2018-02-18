@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rlWrapperUrl"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tvUrl"
+        style="@style/tvDefaultStyle"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/tvDateTime"
+        style="@style/tvSmallStyle"
+        android:layout_below="@+id/tvUrl"/>
+
+</RelativeLayout>
