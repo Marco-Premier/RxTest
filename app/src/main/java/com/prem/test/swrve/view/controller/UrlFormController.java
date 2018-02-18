@@ -30,6 +30,8 @@ import com.prem.test.swrve.view.event.UiEvent;
 
 import org.reactivestreams.Subscription;
 
+import java.util.concurrent.TimeUnit;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -89,6 +91,8 @@ public class UrlFormController extends BaseController<UrlFormView,UrlFormPresent
 
     private Observable<UiEvent> setupEvents(){
         Observable<CheckUrlEvent> checkUrlEvent = RxTextView.afterTextChangeEvents(etUrl)
+                .skip(1)
+                .debounce(300, TimeUnit.MILLISECONDS)
                 .map(text -> new CheckUrlEvent(etUrl.getText().toString()));
 
         Observable<DownloadImageEvent> downloadImageEvent = RxView.clicks(btnDownload)

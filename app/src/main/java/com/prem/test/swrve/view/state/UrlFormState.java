@@ -10,6 +10,7 @@ public class UrlFormState{
     private boolean requestInFlight;
     private boolean showSuccess;
     private boolean showFailure;
+    private boolean showEtError;
     private String imagePath;
 
     protected UrlFormState(){}
@@ -20,6 +21,7 @@ public class UrlFormState{
 
     public static UrlFormState defaultState() {
         UrlFormState urlFormState = new UrlFormState(false);
+        urlFormState.showEtError = false;
         return urlFormState;
     }
 
@@ -29,8 +31,9 @@ public class UrlFormState{
         return urlFormState;
     }
 
-    public static UrlFormState setIsValidUrl(boolean isValidUrl){
-        return new UrlFormState(isValidUrl);
+    public UrlFormState setIsValidUrl(boolean isValidUrl){
+        this.isValidUrl = isValidUrl;
+        return this;
     }
 
     public boolean getIsValidUrl(){
@@ -41,5 +44,12 @@ public class UrlFormState{
         return imagePath;
     }
 
+    public boolean getShowEtError() {
+        return showEtError;
+    }
 
+    public UrlFormState setShowEtError(boolean showEtError) {
+        this.showEtError = showEtError;
+        return this;
+    }
 }

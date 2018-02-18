@@ -33,21 +33,23 @@ public class UrlFormModel {
 
     private Observable<BaseResult> results;
 
-    public UrlFormModel(Observable<BaseAction> actionsStream){
+    public UrlFormModel(Observable<BaseAction> actionsStream, UrlFormState defaultState){
 
         results = actionsStream.compose(setupTransformers());
 
-        UrlFormState defaultState = UrlFormState.defaultState();
         urlFormState =  results
                 .scan(defaultState, (state, result) -> {
                     if(result instanceof CheckUrlResult){
-                        if(((CheckUrlResult)result).getResult() == CheckUrlResult.CHECK_URL_RESULT.VALID)
-                            return UrlFormState.setIsValidUrl(true);
-                        else
-                            return UrlFormState.setIsValidUrl(false);
+                        if(((CheckUrlResult)result).getResult() == CheckUrlResult.CHECK_URL_RESULT.VALID) {
+                            defaultState.setIsValidUrl(true);
+                            return defaultState.setShowEtError(false);
+                        }else {
+                            defaultState.setIsValidUrl(false);
+                            return defaultState.setShowEtError(true);
+                        }
                     }else if(result instanceof DownloadImageResult){
                         if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.IN_FLIGHT)
-                            return UrlFormState.setIsValidUrl(true);
+                            return defaultState.setIsValidUrl(true);
                         else if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.SUCCESS)
                             return UrlFormState.setImagePath(((DownloadImageResult) result).getImagePaht());
                     }

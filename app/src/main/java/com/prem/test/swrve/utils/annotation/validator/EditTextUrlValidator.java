@@ -17,8 +17,15 @@ public class EditTextUrlValidator {
     public Observable<Boolean> isValidUrl(String url){
 
         String regex = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*.(?:jpg|gif|png)\\/?$";
-        return Observable.just(url).map(stringUrl -> (stringUrl.length() > 0 && stringUrl.matches(regex)));
+        //return Observable.just(url).map(stringUrl -> (stringUrl.length() > 0 && stringUrl.matches(regex)));
+        return Observable.just(url).map(stringUrl -> checkUrl(url));
 
+    }
+
+    private boolean checkUrl(String stringUrl){
+        String regex = "(.*\\/)*.+\\.(png|jpg|gif|bmp|jpeg|PNG|JPG|GIF|BMP)$";
+        boolean isValid = stringUrl.length() > 0 && stringUrl.matches(regex);
+        return isValid;
     }
 
 

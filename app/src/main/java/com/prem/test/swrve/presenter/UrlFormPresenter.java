@@ -28,25 +28,29 @@ public class UrlFormPresenter extends BasePresenter<UrlFormView> {
     private Observable<UiEvent> uiEvents;
     private UrlFormModel model;
     private CompositeDisposable disposables = new CompositeDisposable();
+    private UrlFormState urlFormState;
 
     public UrlFormPresenter(Observable<UiEvent> uiEvents){
         this.uiEvents = uiEvents;
+        urlFormState = UrlFormState.defaultState();
+        model = new UrlFormModel(getActions(),urlFormState);
     }
 
     @Override
     public void attachView(UrlFormView view){
         super.attachView(view);
 
-        model = new UrlFormModel(getActions());
         disposables.add(model.getState().subscribe(model -> {
-            if(model.getIsValidUrl()) {
+            //Update state
+            urlFormState = model;
+            if(model.getIsValidUrl())
                 ifViewAttached(ui -> ui.enableDownaloButton());
-                ifViewAttached(ui -> ui.hideInvalidUrlError());
-            }else{
+            else
                 ifViewAttached(ui -> ui.disableDownaloButton());
+            if(model.getShowEtError())
                 ifViewAttached(ui -> ui.showInvalidUrlError());
-
-            }
+            else
+                ifViewAttached(ui -> ui.hideInvalidUrlError());
             if(null != model.getImagePath()){
                 Bitmap bitmap = BitmapFactory.decodeFile(model.getImagePath());
                 ifViewAttached(ui -> ui.displayImage(bitmap));
