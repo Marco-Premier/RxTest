@@ -1,34 +1,28 @@
 package com.prem.test.swrve.view.controller;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
-import com.bluelinelabs.conductor.Controller;
 import com.bluelinelabs.conductor.RouterTransaction;
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 import com.prem.test.swrve.R;
-import com.prem.test.swrve.model.UrlFormModel;
 import com.prem.test.swrve.presenter.UrlFormPresenter;
 import com.prem.test.swrve.utils.annotation.Font;
 import com.prem.test.swrve.view.contract.UrlFormView;
 import com.prem.test.swrve.view.event.CheckUrlEvent;
 import com.prem.test.swrve.view.event.DownloadImageEvent;
 import com.prem.test.swrve.view.event.UiEvent;
-
-import org.reactivestreams.Subscription;
+import com.prem.test.swrve.view.store.DownloadImageStore;
 
 import java.util.concurrent.TimeUnit;
 
@@ -36,9 +30,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 
 /**
  * Created by prem on 12/02/2018.
@@ -124,6 +115,12 @@ public class UrlFormController extends BaseController<UrlFormView,UrlFormPresent
     @Override
     public void displayImage(Bitmap bitmap) {
         ivImage.setImageBitmap(bitmap);
+    }
+
+    @Override
+    public void showToast(String text) {
+        Toast.makeText(getActivity(), text,
+                Toast.LENGTH_LONG).show();
     }
 
 }

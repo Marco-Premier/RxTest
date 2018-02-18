@@ -1,7 +1,6 @@
 package com.prem.test.swrve.view.controller;
 
 import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,19 +8,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.prem.test.swrve.R;
 import com.prem.test.swrve.model.persistent.dto.UrlDto;
-import com.prem.test.swrve.presenter.UrlFormPresenter;
 import com.prem.test.swrve.presenter.UrlListPresenter;
-import com.prem.test.swrve.utils.annotation.Font;
 import com.prem.test.swrve.view.adapter.holder.UrlListViewAdapter;
-import com.prem.test.swrve.view.contract.UrlFormView;
 import com.prem.test.swrve.view.contract.UrlListView;
+import com.prem.test.swrve.view.store.BaseStore;
 
 import java.util.List;
 
@@ -98,4 +93,11 @@ public class UrlListController extends BaseController<UrlListView,UrlListPresent
     public void refreshData(List<UrlDto> data) {
         this.urlListViewAdapter.refreshData(data);
     }
+
+    @Override
+    public void showToast(String text) {
+        Toast.makeText(getActivity(), text,
+                Toast.LENGTH_LONG).show();
+    }
+
 }

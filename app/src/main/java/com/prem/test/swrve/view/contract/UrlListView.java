@@ -12,5 +12,6 @@ import java.util.List;
 public interface UrlListView extends BaseView {
 
     public void refreshData(List<UrlDto> data);
+    public void showToast(String text);
 
 }

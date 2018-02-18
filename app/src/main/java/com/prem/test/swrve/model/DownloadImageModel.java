@@ -5,7 +5,6 @@ import android.util.Log;
 import com.prem.test.swrve.model.action.BaseAction;
 import com.prem.test.swrve.model.action.CheckUrlAction;
 import com.prem.test.swrve.model.action.DownloadImageAction;
-import com.prem.test.swrve.model.persistent.dao.UrlDao;
 import com.prem.test.swrve.model.result.BaseResult;
 import com.prem.test.swrve.model.result.CheckUrlResult;
 import com.prem.test.swrve.model.result.DownloadImageResult;
@@ -17,47 +16,61 @@ import com.prem.test.swrve.utils.file.FileManager;
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import com.prem.test.swrve.view.state.UrlFormState;
+import io.reactivex.disposables.Disposable;
+
+import com.prem.test.swrve.view.store.DownloadImageStore;
+import com.prem.test.swrve.view.store.factory.DefaultStoreFactory;
+import com.prem.test.swrve.view.store.factory.STORE_TYPE;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by prem on 14/02/2018.
  */
 
-public class UrlFormModel {
+public class DownloadImageModel {
 
-    private Observable<UrlFormState> urlFormState;
     private EditTextUrlValidator editTextUrlValidator = new EditTextUrlValidator();
 
-    private ObservableTransformer<CheckUrlAction,CheckUrlResult> checkUrlTransformer;
-    private ObservableTransformer<CheckUrlAction,CheckUrlResult> checkUrlTransformer2;
+    private Observable<DownloadImageStore> store;
 
-    private Observable<BaseResult> results;
+    public DownloadImageModel(Observable<BaseAction> actionsStream){
 
-    public UrlFormModel(Observable<BaseAction> actionsStream, UrlFormState defaultState){
+        DownloadImageStore defaultStore = (DownloadImageStore)DefaultStoreFactory.getInstance().getStore(STORE_TYPE.DOWNLOAD_IMAGE_STORE);
+        Observable<BaseResult> results = actionsStream.compose(setupTransformers());
 
-        results = actionsStream.compose(setupTransformers());
-
-        urlFormState =  results
-                .scan(defaultState, (state, result) -> {
+        store = results
+                .scan(defaultStore, (state, result) -> {
                     if(result instanceof CheckUrlResult){
                         if(((CheckUrlResult)result).getResult() == CheckUrlResult.CHECK_URL_RESULT.VALID) {
-                            defaultState.setIsValidUrl(true);
-                            return defaultState.setShowEtError(false);
+                            defaultStore.setIsValidUrl(true);
+                            defaultStore.setShowEtError(false);
+                            return defaultStore;
                         }else {
-                            defaultState.setIsValidUrl(false);
-                            return defaultState.setShowEtError(true);
+                            defaultStore.setIsValidUrl(false);
+                            defaultStore.setShowEtError(true);
+                            return defaultStore;
                         }
                     }else if(result instanceof DownloadImageResult){
-                        if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.IN_FLIGHT)
-                            return defaultState.setIsValidUrl(true);
-                        else if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.SUCCESS)
-                            return UrlFormState.setImagePath(((DownloadImageResult) result).getImagePaht());
+                        if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.IN_FLIGHT) {
+                            defaultStore.setRequestStatus(DownloadImageStore.REQUEST_STATUS.IN_FLIGHT);
+                            return defaultStore;
+                        }else if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.FAILURE) {
+                            defaultStore.setRequestStatus(DownloadImageStore.REQUEST_STATUS.FAILURE);
+                            return defaultStore;
+                        }else if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.SUCCESS) {
+                            defaultStore.setRequestStatus(DownloadImageStore.REQUEST_STATUS.SUCCESS);
+                            defaultStore.setImagePath(((DownloadImageResult) result).getImagePaht());
+                            return defaultStore;
+                        }
                     }
                     throw new IllegalArgumentException("wrong result: "+result);
                 });
 
+    }
 
-
+    public Disposable subscribe(){
+        return store.subscribe();
     }
 
     private ObservableTransformer<BaseAction,BaseResult> setupTransformers(){
@@ -71,9 +84,8 @@ public class UrlFormModel {
         ApiInterface apiInterface = ServiceProvider.createService();
         ObservableTransformer<DownloadImageAction,DownloadImageResult> downloadImage =
                 actions -> actions.flatMap(action -> apiInterface.downloadFile(action.getUrl())
-                        //.doOnNext(destinationFile -> UrlDao.saveUrl(destinationFile.getPath()))
+                        .delay(5, TimeUnit.SECONDS)
                         .flatMap(FileManager.processResponse())
-                        .doOnNext(destinationFile -> {Log.i("PREM","destinationFile: "+destinationFile);})
                         .map(response -> DownloadImageResult.success(response.getPath()))
                         .onErrorReturn(e -> DownloadImageResult.failure())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -87,10 +99,5 @@ public class UrlFormModel {
 
         return resultsTransformers;
     }
-
-    public Observable<UrlFormState> getState() {
-        return urlFormState;
-    }
-
 
 }

@@ -2,20 +2,24 @@ package com.prem.test.swrve.presenter;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
-import com.prem.test.swrve.model.UrlFormModel;
+import com.prem.test.swrve.model.DownloadImageModel;
 import com.prem.test.swrve.model.action.BaseAction;
 import com.prem.test.swrve.model.action.CheckUrlAction;
 import com.prem.test.swrve.model.action.DownloadImageAction;
-import com.prem.test.swrve.view.state.UrlFormState;
+import com.prem.test.swrve.view.store.DownloadImageStore;
 import com.prem.test.swrve.view.contract.UrlFormView;
 import com.prem.test.swrve.view.event.CheckUrlEvent;
 import com.prem.test.swrve.view.event.DownloadImageEvent;
 import com.prem.test.swrve.view.event.UiEvent;
 
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
 
@@ -26,36 +30,47 @@ import io.reactivex.functions.Function;
 public class UrlFormPresenter extends BasePresenter<UrlFormView> {
 
     private Observable<UiEvent> uiEvents;
-    private UrlFormModel model;
+    private DownloadImageModel model;
     private CompositeDisposable disposables = new CompositeDisposable();
-    private UrlFormState urlFormState;
 
     public UrlFormPresenter(Observable<UiEvent> uiEvents){
         this.uiEvents = uiEvents;
-        urlFormState = UrlFormState.defaultState();
-        model = new UrlFormModel(getActions(),urlFormState);
+        model = new DownloadImageModel(getActions());
     }
 
     @Override
-    public void attachView(UrlFormView view){
+    public void attachView(UrlFormView view) {
         super.attachView(view);
 
-        disposables.add(model.getState().subscribe(model -> {
-            //Update state
-            urlFormState = model;
-            if(model.getIsValidUrl())
-                ifViewAttached(ui -> ui.enableDownaloButton());
-            else
-                ifViewAttached(ui -> ui.disableDownaloButton());
-            if(model.getShowEtError())
-                ifViewAttached(ui -> ui.showInvalidUrlError());
-            else
-                ifViewAttached(ui -> ui.hideInvalidUrlError());
-            if(null != model.getImagePath()){
-                Bitmap bitmap = BitmapFactory.decodeFile(model.getImagePath());
-                ifViewAttached(ui -> ui.displayImage(bitmap));
-            }
-        }));
+        disposables.add(model.subscribe());
+
+        disposables.add(DownloadImageStore
+                .getInstance()
+                .getRelay()
+                .debounce(200, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(downloadImageStore -> {
+                    if(downloadImageStore.getIsValidUrl()){
+                        ifViewAttached(ui -> ui.hideInvalidUrlError());
+                        ifViewAttached(ui -> ui.enableDownaloButton());
+                    }else{
+                        ifViewAttached(ui -> ui.showInvalidUrlError());
+                        ifViewAttached(ui -> ui.disableDownaloButton());
+                    }
+                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.IN_FLIGHT){
+                        ifViewAttached(ui -> ui.showToast("IN FLIGHT"));
+                    }
+                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.SUCCESS){
+                        Bitmap bitmap = BitmapFactory.decodeFile(downloadImageStore.getImagePath());
+                        ifViewAttached(ui -> ui.showToast("SUCCESS"));
+                        ifViewAttached(ui -> ui.displayImage(bitmap));
+                    }
+                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.FAILURE){
+                        ifViewAttached(ui -> ui.showToast("FAILURE"));
+                    }
+                    Log.i("PREM","eccoci");
+                }));
 
     }
 

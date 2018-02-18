@@ -30,7 +30,7 @@ public class MainActivity extends Activity{
         router = Conductor.attachRouter(this, container, savedInstanceState);
         if (!router.hasRootController()) {
             UrlFormController urlFormController = new UrlFormController();
-            urlFormController.setRetainViewMode(Controller.RetainViewMode.RELEASE_DETACH);
+            urlFormController.setRetainViewMode(Controller.RetainViewMode.RETAIN_DETACH);
             router.setRoot(RouterTransaction.with(urlFormController));
         }
     }

@@ -4,15 +4,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.prem.test.swrve.model.UrlFormModel;
 import com.prem.test.swrve.model.persistent.dao.UrlDao;
 import com.prem.test.swrve.model.persistent.dto.UrlDto;
-import com.prem.test.swrve.view.contract.UrlFormView;
 import com.prem.test.swrve.view.contract.UrlListView;
+import com.prem.test.swrve.view.store.DownloadImageStore;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 
 /**
@@ -34,6 +35,25 @@ public class UrlListPresenter extends BasePresenter<UrlListView> {
             ifViewAttached(ui -> ui.refreshData(model));
         }));
 
+        disposables.add(DownloadImageStore
+                .getInstance()
+                .getRelay()
+                .debounce(200, TimeUnit.MILLISECONDS)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(downloadImageStore -> {
+                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.IN_FLIGHT){
+                        ifViewAttached(ui -> ui.showToast("IN FLIGHT"));
+                    }
+                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.SUCCESS){
+                        Bitmap bitmap = BitmapFactory.decodeFile(downloadImageStore.getImagePath());
+                        ifViewAttached(ui -> ui.showToast("SUCCESS"));
+                    }
+                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.FAILURE){
+                        ifViewAttached(ui -> ui.showToast("FAILURE"));
+                    }
+                    Log.i("PREM","eccoci");
+                }));
     }
 
     @Override

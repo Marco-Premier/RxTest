@@ -14,5 +14,6 @@ public interface UrlFormView extends BaseView {
     void showInvalidUrlError();
     void hideInvalidUrlError();
     void displayImage(Bitmap bitmap);
+    void showToast(String text);
 
 }

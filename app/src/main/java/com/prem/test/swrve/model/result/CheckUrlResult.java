@@ -14,10 +14,6 @@ public class CheckUrlResult extends BaseResult {
         this.checkUrlResult = checkUrlResult;
     }
 
-    public static CheckUrlResult defaultState(){
-        return new CheckUrlResult(CHECK_URL_RESULT.INVALID);
-    }
-
     public static CheckUrlResult success(){
         return new CheckUrlResult(CHECK_URL_RESULT.VALID);
     }

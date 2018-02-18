@@ -15,7 +15,6 @@ import io.reactivex.schedulers.Schedulers;
 public class BaseDao {
 
     private static Scheduler scheduler;
-    private static HandlerThread handlerThread;
 
     protected static Scheduler getScheduler(){
         scheduler = (null == scheduler) ? (AndroidSchedulers.mainThread()) : scheduler;
