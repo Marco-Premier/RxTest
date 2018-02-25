@@ -6,4 +6,12 @@
     <dimen name="font_normal">14sp</dimen>
     <!-- margins -->
     <dimen name="margin_normal">10dp</dimen>
+    <dimen name="margin_big">12dp</dimen>
+    <dimen name="margin_x_big">14dp</dimen>
+    <dimen name="margin_xx_big">16dp</dimen>
+    <dimen name="margin_xxx_big">18dp</dimen>
+    <dimen name="margin_xxxx_big">26dp</dimen>
+    <!-- loader -->
+    <dimen name="radius">24dp</dimen>
+    <dimen name="big_radius">30dp</dimen>
 </resources>

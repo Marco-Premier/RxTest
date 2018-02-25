@@ -1,4 +1,4 @@
-package com.prem.test.swrve.model.persistent.dto;
+package com.prem.test.swrve.model.persistent.store;
 
 import java.util.Date;
 
@@ -9,7 +9,7 @@ import io.realm.annotations.PrimaryKey;
  * Created by prem on 18/02/2018.
  */
 
-public class UrlDto extends RealmObject {
+public class SearchHistoryStore extends RealmObject {
 
     @PrimaryKey
     private long idUrl;
@@ -39,4 +39,5 @@ public class UrlDto extends RealmObject {
     public void setDownloadedAt(Date downloadedAt) {
         this.downloadedAt = downloadedAt;
     }
+
 }

@@ -1,10 +1,14 @@
 package com.prem.test.swrve.model;
 
-import android.util.Log;
-
+import com.prem.test.swrve.DefaultModel;
+import com.prem.test.swrve.Swrve;
 import com.prem.test.swrve.model.action.BaseAction;
 import com.prem.test.swrve.model.action.CheckUrlAction;
 import com.prem.test.swrve.model.action.DownloadImageAction;
+import com.prem.test.swrve.model.action.ShowSearchAction;
+import com.prem.test.swrve.model.persistent.dao.DownloadImageDao;
+import com.prem.test.swrve.model.persistent.dao.SearchHistoryDao;
+import com.prem.test.swrve.model.persistent.state.DownloadImageState;
 import com.prem.test.swrve.model.result.BaseResult;
 import com.prem.test.swrve.model.result.CheckUrlResult;
 import com.prem.test.swrve.model.result.DownloadImageResult;
@@ -13,91 +17,109 @@ import com.prem.test.swrve.network.endpoint.ApiInterface;
 import com.prem.test.swrve.utils.annotation.validator.EditTextUrlValidator;
 import com.prem.test.swrve.utils.file.FileManager;
 
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
-import com.prem.test.swrve.view.store.DownloadImageStore;
-import com.prem.test.swrve.view.store.factory.DefaultStoreFactory;
-import com.prem.test.swrve.view.store.factory.STORE_TYPE;
-
-import java.util.concurrent.TimeUnit;
-
 /**
  * Created by prem on 14/02/2018.
  */
 
-public class DownloadImageModel {
+public class DownloadImageModel extends DefaultModel implements BaseModel{
 
     private EditTextUrlValidator editTextUrlValidator = new EditTextUrlValidator();
+    private Observable<DownloadImageState> store;
+    @Inject ApiInterface apiInterface;
+    @Inject FileManager fileManager;
 
-    private Observable<DownloadImageStore> store;
-
-    public DownloadImageModel(Observable<BaseAction> actionsStream){
-
-        DownloadImageStore defaultStore = (DownloadImageStore)DefaultStoreFactory.getInstance().getStore(STORE_TYPE.DOWNLOAD_IMAGE_STORE);
-        Observable<BaseResult> results = actionsStream.compose(setupTransformers());
-
-        store = results
-                .scan(defaultStore, (state, result) -> {
-                    if(result instanceof CheckUrlResult){
-                        if(((CheckUrlResult)result).getResult() == CheckUrlResult.CHECK_URL_RESULT.VALID) {
-                            defaultStore.setIsValidUrl(true);
-                            defaultStore.setShowEtError(false);
-                            return defaultStore;
-                        }else {
-                            defaultStore.setIsValidUrl(false);
-                            defaultStore.setShowEtError(true);
-                            return defaultStore;
-                        }
-                    }else if(result instanceof DownloadImageResult){
-                        if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.IN_FLIGHT) {
-                            defaultStore.setRequestStatus(DownloadImageStore.REQUEST_STATUS.IN_FLIGHT);
-                            return defaultStore;
-                        }else if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.FAILURE) {
-                            defaultStore.setRequestStatus(DownloadImageStore.REQUEST_STATUS.FAILURE);
-                            return defaultStore;
-                        }else if(((DownloadImageResult)result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.SUCCESS) {
-                            defaultStore.setRequestStatus(DownloadImageStore.REQUEST_STATUS.SUCCESS);
-                            defaultStore.setImagePath(((DownloadImageResult) result).getImagePaht());
-                            return defaultStore;
-                        }
-                    }
-                    throw new IllegalArgumentException("wrong result: "+result);
-                });
-
+    @Inject
+    public DownloadImageModel(){
+        Swrve.getModelComponent().inject(this);
     }
 
-    public Disposable subscribe(){
-        return store.subscribe();
-    }
-
-    private ObservableTransformer<BaseAction,BaseResult> setupTransformers(){
+    @Override
+    public ObservableTransformer<BaseAction,BaseResult> setupTransformers(){
 
         ObservableTransformer<CheckUrlAction,CheckUrlResult> checkUrlTransformer =
-                actions -> actions.flatMap(action -> editTextUrlValidator.isValidUrl(action.getUrl()))
+                actions -> actions
+                        .flatMap(action -> editTextUrlValidator.isValidUrl(action.getUrl()))
                         .map(response -> response ? CheckUrlResult.success() : CheckUrlResult.failure())
                         .onErrorReturn(e -> CheckUrlResult.failure())
                         .observeOn(AndroidSchedulers.mainThread());
 
-        ApiInterface apiInterface = ServiceProvider.createService();
+        //ApiInterface apiInterface = ServiceProvider.createService();
         ObservableTransformer<DownloadImageAction,DownloadImageResult> downloadImage =
-                actions -> actions.flatMap(action -> apiInterface.downloadFile(action.getUrl())
-                        .delay(5, TimeUnit.SECONDS)
-                        .flatMap(FileManager.processResponse())
-                        .map(response -> DownloadImageResult.success(response.getPath()))
-                        .onErrorReturn(e -> DownloadImageResult.failure())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .startWith(DownloadImageResult.inFlight()));
+                actions -> actions
+                        .flatMap(action -> apiInterface.downloadFile(action.getUrl())
+                                .flatMap(fileManager.processResponse())
+                                .delay(4, TimeUnit.SECONDS)
+                                .map(response -> DownloadImageResult.success(response.getPath()))
+                                .onErrorReturn(e -> DownloadImageResult.failure())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .startWith(DownloadImageResult.inFlight(action.getUrl(),action.getIdUrl())));
+
+        ObservableTransformer<ShowSearchAction,DownloadImageResult> showSearchTransformer =
+                actions -> actions
+                        .map(action -> action.isResetUrlText() ? DownloadImageResult.idle(true) : DownloadImageResult.idle(false))
+                        .observeOn(AndroidSchedulers.mainThread());
 
         ObservableTransformer<BaseAction,BaseResult> resultsTransformers =
                 actions -> actions.publish(shared -> Observable.merge(
                         shared.ofType(CheckUrlAction.class).compose(checkUrlTransformer),
-                        shared.ofType(DownloadImageAction.class).compose(downloadImage)
+                        shared.ofType(DownloadImageAction.class).compose(downloadImage),
+                        shared.ofType(ShowSearchAction.class).compose(showSearchTransformer)
                 ));
 
         return resultsTransformers;
     }
 
+    @Override
+    public void create(Observable<BaseAction> actionStream) {
+        DownloadImageState defaultState = DownloadImageDao.defaultState();
+        Observable<BaseResult> results = actionStream.compose(setupTransformers());
+
+        store = results
+                .scan(defaultState, (state, result) -> {
+                    if (result instanceof CheckUrlResult) {
+                        if (((CheckUrlResult) result).getResult() == CheckUrlResult.CHECK_URL_RESULT.VALID) {
+                            DownloadImageDao.validUrl();
+                        } else {
+                            DownloadImageDao.invalidUrl();
+                        }
+                    } else if (result instanceof DownloadImageResult) {
+
+                        if (((DownloadImageResult) result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.IDLE) {
+                            DownloadImageDao.idle(((DownloadImageResult) result).isResetUrlText());
+                        }else if (((DownloadImageResult) result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.IN_FLIGHT) {
+                            if (null == ((DownloadImageResult) result).getIdUrl())
+                                //Create search history first
+                                DownloadImageDao.inFlight(((DownloadImageResult) result).getUrl(), SearchHistoryDao.saveSearchHistory(((DownloadImageResult) result).getUrl()));
+                            else {
+                                SearchHistoryDao.updateUrl(((DownloadImageResult) result).getUrl(), ((DownloadImageResult) result).getIdUrl());
+                                DownloadImageDao.inFlight(((DownloadImageResult) result).getUrl(), ((DownloadImageResult) result).getIdUrl());
+                            }
+                        } else if (((DownloadImageResult) result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.FAILURE) {
+                            DownloadImageDao.failure();
+                        } else if (((DownloadImageResult) result).getDownloadStatus() == DownloadImageResult.DOWNLOAD_STATUS.SUCCESS) {
+                            DownloadImageDao.success(((DownloadImageResult) result).getImagePaht());
+                        }
+                        if (((DownloadImageResult) result).isResetUrlText()) {
+                            DownloadImageDao.resetUrlText();
+                        }
+                    }
+                    return DownloadImageDao.defaultState();
+
+                });
+    }
+
+    @Override
+    public Disposable subscribe(Observable<BaseAction> actionStream) {
+        create(actionStream);
+        return store.subscribe();
+    }
 }

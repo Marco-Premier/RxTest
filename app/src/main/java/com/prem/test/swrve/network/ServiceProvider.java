@@ -2,7 +2,6 @@ package com.prem.test.swrve.network;
 
 import com.prem.test.swrve.network.endpoint.ApiInterface;
 
-import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;

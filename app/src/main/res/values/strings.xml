@@ -5,5 +5,22 @@
     <string name="ufw_et_url_hint">Insert a valid URL</string>
     <string name="ufw_et_url_error">Please insert a valid URL</string>
     <string name="ufw_btn_download">DOWNLOAD</string>
-    <string name="ufw_btn_go_to_list">Vai alla lista</string>
+    <string name="ufw_btn_open_image">OPEN IMAGE</string>
+    <string name="ufw_btn_new_search">NEW SEARCH</string>
+    <string name="ufw_btn_update_url">UPDATE URL</string>
+    <string name="ufw_btn_go_to_list">Browse urls</string>
+    <string name="ufw_tv_downaloding">The following image is being downloaded:</string>
+    <string name="ufw_tv_error">An error occurred while downloading the following image:</string>
+    <string name="ufw_tv_downaloded">The following image has been downloaded:</string>
+    <!-- recycle url list view -->
+    <string name="ulv_tv_empty_message">Nothing to show yet</string>
+    <string name="ulv_btn_empty_message">DOWNLOAD IMAGE</string>
+    <!-- recycle url list item -->
+    <string name="tv_label_url">Url: </string>
+    <string name="tv_label_date">Date: </string>
+    <string name="tv_label_open_image">Tap to open the image</string>
+    <string name="tv_label_download_image">Tap to downalod the image</string>
+    <string name="tv_label_error">An error occurred while downloading the image</string>
+    <!-- menu -->
+    <string name="item_list">List</string>
 </resources>

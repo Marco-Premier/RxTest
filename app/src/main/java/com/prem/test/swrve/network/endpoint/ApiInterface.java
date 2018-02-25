@@ -12,6 +12,7 @@ import retrofit2.http.Url;
  */
 
 public interface ApiInterface {
+
     @Streaming
     @GET
     Observable<Response<ResponseBody>> downloadFile(@Url String fileUrl);

@@ -1,43 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:focusableInTouchMode="true" >
+    android:focusableInTouchMode="true">
 
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar_elevation" />
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/tilUrl"
-        style="@style/tilDefaultStyle"
+    <RelativeLayout
+        android:id="@+id/rlWrapperSeach"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/toolbar">
 
-        <EditText
-            android:id="@+id/etUrl"
-            android:inputType="textUri"
-            style="@style/etDefaultStyle"
-            android:hint="@string/ufw_et_url_hint" />
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/tilUrl"
+            style="@style/tilDefaultStyle">
 
-    </android.support.design.widget.TextInputLayout>
+            <EditText
+                android:id="@+id/etUrl"
+                android:inputType="textUri"
+                style="@style/etDefaultStyle"
+                android:hint="@string/ufw_et_url_hint" />
 
-    <ImageView
-        android:id="@+id/ivImage"
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/btnDownload"
+            android:layout_alignParentBottom="true"
+            style="@style/btnDefaultStyle"
+            android:enabled="false"
+            android:text="@string/ufw_btn_download"/>
+
+    </RelativeLayout>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cvWrapperStatus"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_below="@+id/tilUrl"/>
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_normal"
+        card_view:cardCornerRadius="6dp"
+        card_view:cardElevation="2dp"
+        android:visibility="gone">
 
-    <Button
-        android:id="@+id/btnDownload"
-        android:layout_alignParentBottom="true"
-        style="@style/btnDefaultStyle"
-        android:enabled="false"
-        android:text="@string/ufw_btn_download"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/btnGoToUrlList"
-        style="@style/btnDefaultStyle"
-        android:text="@string/ufw_btn_go_to_list"
-        android:layout_above="@+id/btnDownload"/>
+            <TextView
+                android:id="@+id/tvIntro"
+                style="@style/tvDefaultStyle"
+                android:text="@string/ufw_tv_downaloding"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentTop="true"/>
+
+            <TextView
+                android:id="@+id/tvUrl"
+                style="@style/tvDefaultStyle"
+                android:textColor="@android:color/black"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/tvIntro"/>
+
+            <ProgressBar
+                android:id="@+id/pbLoader"
+                android:layout_width="@dimen/big_radius"
+                android:layout_height="@dimen/big_radius"
+                android:indeterminate="true"
+                android:layout_margin="@dimen/margin_xxxx_big"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/tvUrl"/>
+
+            <LinearLayout
+                android:id="@+id/llWrapperActions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="horizontal"
+                android:layout_below="@+id/tvUrl"
+                android:weightSum="1">
+
+                <Button
+                    android:id="@+id/btnShowImage"
+                    style="@style/btnDefaultStyle"
+                    android:layout_width="0dp"
+                    android:text="@string/ufw_btn_open_image"
+                    android:layout_weight=".5"/>
+
+                <Button
+                    android:id="@+id/btnNewSearch"
+                    style="@style/btnDefaultStyle"
+                    android:layout_width="0dp"
+                    android:text="@string/ufw_btn_new_search"
+                    android:layout_weight=".5"/>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnChangeUrl"
+                style="@style/btnDefaultStyle"
+                android:text="@string/ufw_btn_update_url"
+                android:layout_below="@+id/tvUrl"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+
 
 </RelativeLayout>

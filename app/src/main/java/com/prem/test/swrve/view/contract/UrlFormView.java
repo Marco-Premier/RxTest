@@ -1,8 +1,6 @@
 package com.prem.test.swrve.view.contract;
 
 
-import android.graphics.Bitmap;
-
 /**
  * Created by prem on 12/02/2018.
  */
@@ -13,7 +11,10 @@ public interface UrlFormView extends BaseView {
     void disableDownaloButton();
     void showInvalidUrlError();
     void hideInvalidUrlError();
-    void displayImage(Bitmap bitmap);
-    void showToast(String text);
+    void showLoadingStatus(String url);
+    void showErrorStatus(String url);
+    void showSuccessStatus(String url);
+    void showIdleStatus();
+    void setUrlText(String urlText);
 
 }

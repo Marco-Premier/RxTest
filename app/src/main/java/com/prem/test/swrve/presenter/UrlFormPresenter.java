@@ -1,20 +1,27 @@
 package com.prem.test.swrve.presenter;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.prem.test.swrve.Swrve;
 import com.prem.test.swrve.model.DownloadImageModel;
 import com.prem.test.swrve.model.action.BaseAction;
 import com.prem.test.swrve.model.action.CheckUrlAction;
 import com.prem.test.swrve.model.action.DownloadImageAction;
-import com.prem.test.swrve.view.store.DownloadImageStore;
+import com.prem.test.swrve.model.action.ShowSearchAction;
+import com.prem.test.swrve.model.persistent.dao.DownloadImageDao;
+import com.prem.test.swrve.model.persistent.state.DownloadImageState;
+import com.prem.test.swrve.model.persistent.state.enum_type.REQUEST_STATUS;
 import com.prem.test.swrve.view.contract.UrlFormView;
+import com.prem.test.swrve.view.event.ChangeUrlEvent;
 import com.prem.test.swrve.view.event.CheckUrlEvent;
 import com.prem.test.swrve.view.event.DownloadImageEvent;
+import com.prem.test.swrve.view.event.NewSearchEvent;
 import com.prem.test.swrve.view.event.UiEvent;
 
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -30,47 +37,58 @@ import io.reactivex.functions.Function;
 public class UrlFormPresenter extends BasePresenter<UrlFormView> {
 
     private Observable<UiEvent> uiEvents;
-    private DownloadImageModel model;
+
+    @Inject
+    //@Named("DownloadImageModel")
+    DownloadImageModel model;
+
     private CompositeDisposable disposables = new CompositeDisposable();
 
     public UrlFormPresenter(Observable<UiEvent> uiEvents){
         this.uiEvents = uiEvents;
-        model = new DownloadImageModel(getActions());
+        Swrve.getModelComponent().inject(this);
+        //this.model = new DownloadImageModel();
     }
 
     @Override
     public void attachView(UrlFormView view) {
         super.attachView(view);
 
-        disposables.add(model.subscribe());
+        disposables.add(model.subscribe(getActions()));
 
-        disposables.add(DownloadImageStore
-                .getInstance()
-                .getRelay()
+        disposables.add(DownloadImageDao
+                .getDownloadImageState()
                 .debounce(200, TimeUnit.MILLISECONDS)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(downloadImageStore -> {
-                    if(downloadImageStore.getIsValidUrl()){
-                        ifViewAttached(ui -> ui.hideInvalidUrlError());
+                .subscribe(downloadImageState -> {
+                    Log.i("PREM","REQUEST STATUS: "+downloadImageState.getRequestStatus()+" - "+REQUEST_STATUS.SUCCESS.toString());
+                    if(downloadImageState.isValidUrl()){
                         ifViewAttached(ui -> ui.enableDownaloButton());
                     }else{
-                        ifViewAttached(ui -> ui.showInvalidUrlError());
                         ifViewAttached(ui -> ui.disableDownaloButton());
                     }
-                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.IN_FLIGHT){
-                        ifViewAttached(ui -> ui.showToast("IN FLIGHT"));
+                    if(downloadImageState.isShowEtError()){
+                        ifViewAttached(ui -> ui.showInvalidUrlError());
+                    }else{
+                        ifViewAttached(ui -> ui.hideInvalidUrlError());
                     }
-                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.SUCCESS){
-                        Bitmap bitmap = BitmapFactory.decodeFile(downloadImageStore.getImagePath());
-                        ifViewAttached(ui -> ui.showToast("SUCCESS"));
-                        ifViewAttached(ui -> ui.displayImage(bitmap));
+                    if(downloadImageState.getRequestStatus().equals(REQUEST_STATUS.IN_FLIGHT.toString())){
+                        ifViewAttached(ui -> ui.showLoadingStatus(downloadImageState.getCurrentUrl()));
                     }
-                    if(downloadImageStore.getRequestStatus() == DownloadImageStore.REQUEST_STATUS.FAILURE){
-                        ifViewAttached(ui -> ui.showToast("FAILURE"));
+                    if(downloadImageState.getRequestStatus().equals(REQUEST_STATUS.SUCCESS.toString())){
+                        ifViewAttached(ui -> ui.showSuccessStatus(downloadImageState.getCurrentUrl()));
                     }
-                    Log.i("PREM","eccoci");
-                }));
+                    if(downloadImageState.getRequestStatus().equals(REQUEST_STATUS.FAILURE.toString())){
+                        ifViewAttached(ui -> ui.showErrorStatus(downloadImageState.getCurrentUrl()));
+                    }
+                    if(downloadImageState.getRequestStatus().equals(REQUEST_STATUS.IDLE.toString())){
+                        ifViewAttached(ui -> ui.showIdleStatus());
+                    }
+                    if(downloadImageState.isResetUrlText()){
+                        ifViewAttached(ui -> ui.setUrlText(null));
+                    }
+        }));
 
     }
 
@@ -92,9 +110,18 @@ public class UrlFormPresenter extends BasePresenter<UrlFormView> {
                     public BaseAction apply(UiEvent uiEvent) throws Exception {
                         if(uiEvent instanceof CheckUrlEvent)
                             return new CheckUrlAction(((CheckUrlEvent)uiEvent).getUrl());
-                        if(uiEvent instanceof DownloadImageEvent)
-                            return new DownloadImageAction(((DownloadImageEvent)uiEvent).getUrl());
-                        return null;
+                        if(uiEvent instanceof DownloadImageEvent) {
+                            DownloadImageState downloadImageState = DownloadImageDao.defaultState();
+                            Log.i("PREM","id: "+downloadImageState.getCurrentIdUrl());
+                            if(null != downloadImageState.getCurrentIdUrl())
+                                return new DownloadImageAction(((DownloadImageEvent) uiEvent).getUrl(), downloadImageState.getCurrentIdUrl());
+                            else
+                                return new DownloadImageAction(((DownloadImageEvent) uiEvent).getUrl(), null);
+                        }if(uiEvent instanceof NewSearchEvent)
+                            return new ShowSearchAction(true);
+                        if(uiEvent instanceof ChangeUrlEvent)
+                            return new ShowSearchAction(false);
+                        throw new IllegalArgumentException("unknown event");
                     }
                 });
             }});

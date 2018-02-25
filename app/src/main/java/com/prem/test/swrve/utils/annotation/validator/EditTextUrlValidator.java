@@ -1,11 +1,5 @@
 package com.prem.test.swrve.utils.annotation.validator;
 
-import android.util.Log;
-
-import com.prem.test.swrve.model.result.CheckUrlResult;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Predicate;
 import io.reactivex.Observable;
 
 /**
