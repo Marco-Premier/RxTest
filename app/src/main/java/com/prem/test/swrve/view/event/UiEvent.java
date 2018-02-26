@@ -5,4 +5,5 @@ package com.prem.test.swrve.view.event;
  */
 
 public abstract class UiEvent {
+
 }

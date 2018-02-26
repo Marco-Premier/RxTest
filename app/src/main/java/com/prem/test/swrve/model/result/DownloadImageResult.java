@@ -45,7 +45,6 @@ public class DownloadImageResult extends BaseResult {
         DownloadImageResult downloadImageResult = new DownloadImageResult(SUCCESS);
         downloadImageResult.imagePaht = path;
         return downloadImageResult;
-        //TODO update SearchHistoryStore with current image path -> non serve, è già nello state, beccalo da li
     }
 
     public static DownloadImageResult failure(){

@@ -1,4 +1,4 @@
-package com.prem.test.swrve.model.persistent.state.enum_type;
+package com.prem.test.swrve.presenter.state.enum_type;
 
 /**
  * Created by prem on 19/02/2018.

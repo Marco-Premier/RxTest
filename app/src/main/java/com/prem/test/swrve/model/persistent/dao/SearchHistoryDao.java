@@ -1,6 +1,6 @@
 package com.prem.test.swrve.model.persistent.dao;
 
-import com.prem.test.swrve.model.persistent.store.SearchHistoryStore;
+import com.prem.test.swrve.model.persistent.realm.SearchHistoryWrapper;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -18,15 +18,15 @@ import io.realm.Sort;
  * Created by prem on 18/02/2018.
  */
 
-public class SearchHistoryDao extends BaseDao{
+public class SearchHistoryDao extends BaseDao {
 
-    public static Observable<List<SearchHistoryStore>> getSearchHistoryStore() {
-        return Observable.create((ObservableOnSubscribe<List<SearchHistoryStore>>) emitter -> {
+    public static Observable<List<SearchHistoryWrapper>> getSearchHistoryStore() {
+        return Observable.create((ObservableOnSubscribe<List<SearchHistoryWrapper>>) emitter -> {
             Realm realm = Realm.getDefaultInstance();
-            final RealmResults<SearchHistoryStore> dbUrls = realm.where(SearchHistoryStore.class).findAll().sort("idUrl",Sort.DESCENDING);
-            final RealmChangeListener<RealmResults<SearchHistoryStore>> realmChangeListener = element -> {
+            final RealmResults<SearchHistoryWrapper> dbUrls = realm.where(SearchHistoryWrapper.class).findAll().sort("idUrl",Sort.DESCENDING);
+            final RealmChangeListener<RealmResults<SearchHistoryWrapper>> realmChangeListener = element -> {
                 if(element.isLoaded() && !emitter.isDisposed()) {
-                    //List<SearchHistoryStore> urls = mapFrom(element);
+                    //List<SearchHistoryWrapper> urls = mapFrom(element);
                     if(!emitter.isDisposed()) {
                         emitter.onNext(element);
                     }
@@ -48,16 +48,16 @@ public class SearchHistoryDao extends BaseDao{
                 .unsubscribeOn(getScheduler());
     }
 
-    public static List<SearchHistoryStore> findAll(){
+    public static List<SearchHistoryWrapper> findAll(){
         try(Realm realm = Realm.getDefaultInstance()) {
-            return realm.where(SearchHistoryStore.class)
+            return realm.where(SearchHistoryWrapper.class)
                     .findAll();
         }
     }
 
-    public static SearchHistoryStore findUrlById(long idUrl){
+    public static SearchHistoryWrapper findUrlById(long idUrl){
         try(Realm realm = Realm.getDefaultInstance()) {
-            return realm.where(SearchHistoryStore.class)
+            return realm.where(SearchHistoryWrapper.class)
                     .equalTo("idUrl",idUrl)
                     .findFirst();
         }
@@ -66,38 +66,38 @@ public class SearchHistoryDao extends BaseDao{
     public static long saveSearchHistory(String url){
         try(Realm realm = Realm.getDefaultInstance()) {
             realm.beginTransaction();
-            SearchHistoryStore searchHistoryStore = createUrlDto(url,realm);
-            realm.insertOrUpdate(searchHistoryStore);
+            SearchHistoryWrapper searchHistoryWrapper = createUrlDto(url,realm);
+            realm.insertOrUpdate(searchHistoryWrapper);
             realm.commitTransaction();
-            return searchHistoryStore.getIdUrl();
+            return searchHistoryWrapper.getIdUrl();
         }
     }
 
     public static void updateUrl(String newUrl, long idUrl){
         try(Realm realm = Realm.getDefaultInstance()) {
             realm.executeTransaction(realmInstance -> {
-                SearchHistoryStore searchHistoryStore = realmInstance.where(SearchHistoryStore.class)
+                SearchHistoryWrapper searchHistoryWrapper = realmInstance.where(SearchHistoryWrapper.class)
                         .equalTo("idUrl",idUrl)
                         .findFirst();
-                searchHistoryStore.setUrl(newUrl);
-                realmInstance.copyToRealmOrUpdate(searchHistoryStore);
+                searchHistoryWrapper.setUrl(newUrl);
+                realmInstance.copyToRealmOrUpdate(searchHistoryWrapper);
 
             });
         }
     }
 
-    private static SearchHistoryStore createUrlDto(String url, Realm realm){
-        SearchHistoryStore searchHistoryStore = new SearchHistoryStore();
+    private static SearchHistoryWrapper createUrlDto(String url, Realm realm){
+        SearchHistoryWrapper searchHistoryWrapper = new SearchHistoryWrapper();
         Date now = Calendar.getInstance().getTime();
-        searchHistoryStore.setUrl(url);
-        searchHistoryStore.setDownloadedAt(now);
-        searchHistoryStore.setIdUrl(getNextId(realm));
-        return searchHistoryStore;
+        searchHistoryWrapper.setUrl(url);
+        searchHistoryWrapper.setDownloadedAt(now);
+        searchHistoryWrapper.setIdUrl(getNextId(realm));
+        return searchHistoryWrapper;
     }
 
     private static int getNextId(Realm realm) {
         try {
-            Number number = realm.where(SearchHistoryStore.class).max("idUrl");
+            Number number = realm.where(SearchHistoryWrapper.class).max("idUrl");
             if (number != null) {
                 return number.intValue() + 1;
             } else {

@@ -18,9 +18,10 @@ import com.bluelinelabs.conductor.RouterTransaction;
 import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.prem.test.swrve.R;
-import com.prem.test.swrve.model.persistent.state.DownloadImageState;
-import com.prem.test.swrve.model.persistent.store.SearchHistoryStore;
+import com.prem.test.swrve.Swrve;
+import com.prem.test.swrve.model.persistent.realm.SearchHistoryWrapper;
 import com.prem.test.swrve.presenter.UrlListPresenter;
+import com.prem.test.swrve.presenter.state.DownloadImageState;
 import com.prem.test.swrve.utils.annotation.Font;
 import com.prem.test.swrve.utils.annotation.processor.FontInjector;
 import com.prem.test.swrve.view.adapter.UrlListViewAdapter;
@@ -28,6 +29,8 @@ import com.prem.test.swrve.view.contract.UrlListView;
 import com.prem.test.swrve.view.event.ImagesListItemTapEvent;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,7 +43,7 @@ import io.reactivex.subjects.PublishSubject;
 
 public class UrlListController extends BaseController<UrlListView,UrlListPresenter> implements UrlListView {
 
-    private PublishSubject<ImagesListItemTapEvent> itemViewClickSubject = PublishSubject.create();
+    @Inject PublishSubject<ImagesListItemTapEvent> itemViewClickSubject;
     private Unbinder unbinder;
     private View.OnClickListener onDownloadImageListener;
     private View.OnClickListener onOpenImageListener;
@@ -55,6 +58,8 @@ public class UrlListController extends BaseController<UrlListView,UrlListPresent
     @Override
     protected View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container) {
         View rootView = inflater.inflate(R.layout.url_list_view, container, false);
+
+        Swrve.getDefaultComponent().inject(this);
 
         unbinder = ButterKnife.bind(this, rootView);
         FontInjector.injectFont(this,getActivity());
@@ -78,16 +83,6 @@ public class UrlListController extends BaseController<UrlListView,UrlListPresent
             default:
                 return super.onOptionsItemSelected(item);
         }
-
-    }
-
-    @Override
-    protected void onAttach(@NonNull View view) {
-
-    }
-
-    @Override
-    protected void onDetach(@NonNull View view) {
 
     }
 
@@ -140,7 +135,7 @@ public class UrlListController extends BaseController<UrlListView,UrlListPresent
     }
 
     @Override
-    public void refreshStore(List<SearchHistoryStore> store) {
+    public void refreshStore(List<SearchHistoryWrapper> store) {
         this.urlListViewAdapter.refreshStore(store);
         cvWrapperEmptyMessage.setVisibility(View.GONE);
         rvUrlList.setVisibility(View.VISIBLE);

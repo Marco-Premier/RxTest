@@ -1,16 +1,15 @@
-package com.prem.test.swrve.model.persistent.state;
+package com.prem.test.swrve.presenter.state;
 
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
+import com.prem.test.swrve.presenter.state.enum_type.REQUEST_STATUS;
+
+import javax.inject.Inject;
 
 /**
  * Created by prem on 19/02/2018.
  */
 
-public class DownloadImageState extends RealmObject  {
+public class DownloadImageState extends BaseState {
 
-    @PrimaryKey
-    private Long idState;
     private String requestStatus;
     private boolean isValidUrl;
     private boolean showEtError;
@@ -19,15 +18,18 @@ public class DownloadImageState extends RealmObject  {
     private String currentUrl;
     private boolean resetUrlText;
 
-    public Long getIdState() {
-        return idState;
+    @Inject
+    public DownloadImageState(){
+        isValidUrl = false;
+        showEtError = false;
+        imagePath = null;
+        requestStatus = REQUEST_STATUS.IDLE.toString();
+        currentIdUrl = null;
+        currentUrl = null;
+        resetUrlText = false;
     }
 
-    public void setIdState(Long idState) {
-        this.idState = idState;
-    }
-
-    public String getRequestStatus(){
+    public String getRequestStatus() {
         return requestStatus;
     }
 

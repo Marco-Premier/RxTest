@@ -24,8 +24,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".utils.service.LifeCycleService"></service>
-
     </application>
 
 </manifest>

@@ -3,8 +3,6 @@ package com.prem.test.swrve.dagger.modules;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.prem.test.swrve.Swrve;
-
 import javax.inject.Singleton;
 
 import dagger.Module;

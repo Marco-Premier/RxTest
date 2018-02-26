@@ -56,7 +56,8 @@
                 style="@style/tvDefaultStyle"
                 android:text="@string/ufw_tv_downaloding"
                 android:layout_centerHorizontal="true"
-                android:layout_alignParentTop="true"/>
+                android:layout_alignParentTop="true"
+                android:textColor="@color/colorPrimary"/>
 
             <TextView
                 android:id="@+id/tvUrl"

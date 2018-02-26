@@ -7,14 +7,16 @@ import android.graphics.Point;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.prem.test.swrve.Swrve;
+import com.prem.test.swrve.model.action.DownloadImageAction;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +26,12 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.functions.Function;
+import okhttp3.Headers;
 import okhttp3.ResponseBody;
 import retrofit2.Response;
+import retrofit2.http.Url;
+
+import static java.lang.System.in;
 
 /**
  * Created by prem on 16/02/2018.
@@ -40,34 +46,67 @@ public class FileManager {
         this.context = context;
     }
 
-    public Function<Response<ResponseBody>, Observable<File>> processResponse() {
-        return new Function<Response<ResponseBody>, Observable<File>>() {
+    public Function<DownloadImageAction, Observable<Bitmap>> processResponse() {
+        return new Function<DownloadImageAction, Observable<Bitmap>>() {
             @Override
-            public Observable<File> apply(Response<ResponseBody> responseBodyResponse) throws Exception {
+            public Observable<Bitmap> apply(DownloadImageAction responseBodyResponse) throws Exception {
                 return saveToDiskRx(responseBodyResponse);
             }
         };
     }
 
-    private Observable<File> saveToDiskRx(final Response<ResponseBody> response) {
-        return Observable.create(new ObservableOnSubscribe<File>() {
+    public Observable<Bitmap> saveToDiskRx(final DownloadImageAction response) {
+        return Observable.create(new ObservableOnSubscribe<Bitmap>() {
             @Override
-            public void subscribe(ObservableEmitter<File> emitter) throws Exception {
+            public void subscribe(ObservableEmitter<Bitmap> emitter) throws Exception {
 
-                InputStream inputStream = response.body().byteStream();
+                try {
 
-                InputStream is1 = new ByteArrayInputStream(response.body().bytes());
+
+                    URL url = new URL("http://freebigpictures.com/wp-content/uploads/2009/09/summer-sky.jpg");
+                    InputStream inputStream = url.openStream();
+                    final BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    final Bitmap bitmap1 = BitmapFactory.decodeStream(inputStream, null, options);
+                    // Calculate inSampleSize
+                    int reqHeight = (options.outHeight > options.outWidth) ? getDisplaySize().y : getDisplaySize().x;
+                    int reqWidth = (options.outHeight > options.outWidth) ? getDisplaySize().x : getDisplaySize().y;
+                    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+                    // Decode bitmap with inSampleSize set
+                    options.inJustDecodeBounds = false;
+                    inputStream.close();
+                    inputStream = url.openStream();
+                    final Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+
+                    emitter.onNext(bitmap);
+                    emitter.onComplete();
+
+                }catch (Exception e){
+                    emitter.onError(e);
+                }
+
+
+                /*InputStream inputStream = response.body().byteStream();
+                Headers h = response.headers();
+                Integer contentLength = Integer.parseInt(h.get("Content-Length"));
+                boolean ma = inputStream.markSupported();
+
+                File f = new File("http://freebigpictures.com/wp-content/uploads/2009/09/summer-sky.jpg");
+                long a = f.length();
+
+                //InputStream is1 = new ByteArrayInputStream(response.body().bytes());
 
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
-                BitmapFactory.decodeStream(inputStream, null, options);
+                final Bitmap bitmap1 = BitmapFactory.decodeStream(inputStream, null, options);
                 // Calculate inSampleSize
                 int reqHeight = (options.outHeight > options.outWidth) ?  getDisplaySize().y : getDisplaySize().x;
                 int reqWidth= (options.outHeight > options.outWidth) ?  getDisplaySize().x : getDisplaySize().y;
                 options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
                 // Decode bitmap with inSampleSize set
                 options.inJustDecodeBounds = false;
-                final Bitmap bitmap = BitmapFactory.decodeStream(is1, null, options);
+                //final Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+                final Bitmap bitmap = BitmapFactory.decodeByteArray(response.body().bytes(), 0,contentLength, options);
 
                 String fileName = "downaloded_image.jpg";
                 File destinationFile = new File(context.getFilesDir(), fileName);
@@ -81,7 +120,7 @@ public class FileManager {
                     emitter.onError(e);
                 } catch (IOException e) {
                     emitter.onError(e);
-                }
+                }*/
             }
         });
     }

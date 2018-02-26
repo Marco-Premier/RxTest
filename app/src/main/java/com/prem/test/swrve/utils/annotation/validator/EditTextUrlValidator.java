@@ -1,5 +1,7 @@
 package com.prem.test.swrve.utils.annotation.validator;
 
+import javax.inject.Inject;
+
 import io.reactivex.Observable;
 
 /**
@@ -7,6 +9,9 @@ import io.reactivex.Observable;
  */
 
 public class EditTextUrlValidator {
+
+    @Inject
+    public EditTextUrlValidator(){}
 
     public Observable<Boolean> isValidUrl(String url){
 

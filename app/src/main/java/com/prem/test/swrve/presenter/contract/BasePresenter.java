@@ -1,4 +1,4 @@
-package com.prem.test.swrve.presenter;
+package com.prem.test.swrve.presenter.contract;
 
 import com.hannesdorfmann.mosby3.mvp.MvpBasePresenter;
 import com.hannesdorfmann.mosby3.mvp.MvpView;
@@ -8,4 +8,5 @@ import com.hannesdorfmann.mosby3.mvp.MvpView;
  */
 
 public abstract class BasePresenter<V extends MvpView> extends MvpBasePresenter<V> {
+
 }

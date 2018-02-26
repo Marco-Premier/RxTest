@@ -1,4 +1,4 @@
-package com.prem.test.swrve.model.persistent.store;
+package com.prem.test.swrve.model.persistent.realm;
 
 import java.util.Date;
 
@@ -9,7 +9,7 @@ import io.realm.annotations.PrimaryKey;
  * Created by prem on 18/02/2018.
  */
 
-public class SearchHistoryStore extends RealmObject {
+public class SearchHistoryWrapper extends RealmObject {
 
     @PrimaryKey
     private long idUrl;

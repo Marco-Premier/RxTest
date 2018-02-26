@@ -45,7 +45,7 @@ import io.reactivex.Observable;
  * Created by prem on 12/02/2018.
  */
 
-public class UrlFormController extends BaseController<UrlFormView,UrlFormPresenter> implements UrlFormView {
+public class UrlFormController extends EventBaseController<UrlFormView,UrlFormPresenter> implements UrlFormView {
 
     private Unbinder unbinder;
 
@@ -126,7 +126,9 @@ public class UrlFormController extends BaseController<UrlFormView,UrlFormPresent
         return new UrlFormPresenter(setupEvents());
     }
 
-    private Observable<UiEvent> setupEvents(){
+    @Override
+    protected Observable<UiEvent> setupEvents(){
+
         Observable<CheckUrlEvent> checkUrlEvent = RxTextView.afterTextChangeEvents(etUrl)
                 .skip(1)
                 .debounce(300, TimeUnit.MILLISECONDS)

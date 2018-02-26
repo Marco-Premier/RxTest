@@ -1,12 +1,14 @@
 package com.prem.test.swrve.dagger.modules;
 
-import com.bluelinelabs.conductor.Controller;
-import com.prem.test.swrve.view.controller.ImageController;
-import com.prem.test.swrve.view.controller.UrlFormController;
-import com.prem.test.swrve.view.controller.UrlListController;
+import com.prem.test.swrve.presenter.binders.BindDownloadImageState;
+import com.prem.test.swrve.presenter.state.DownloadImageState;
+import com.prem.test.swrve.view.event.ImagesListItemTapEvent;
+
+import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import io.reactivex.subjects.PublishSubject;
 
 /**
  * Created by prem on 23/02/2018.
@@ -15,24 +17,20 @@ import dagger.Provides;
 public class ViewModule {
 
     @Provides
-    public UrlFormController provideUrlFormController() {
-        UrlFormController urlFormController = new UrlFormController();
-        urlFormController.setRetainViewMode(Controller.RetainViewMode.RETAIN_DETACH);
-        return urlFormController;
+    public PublishSubject<ImagesListItemTapEvent> provideImagesListTapPublisher() {
+        return PublishSubject.create();
     }
 
     @Provides
-    public UrlListController provideUrlListController() {
-        UrlListController urlListController = new UrlListController();
-        urlListController.setRetainViewMode(Controller.RetainViewMode.RETAIN_DETACH);
-        return urlListController;
+    @Singleton
+    DownloadImageState provideState(){
+        return new DownloadImageState();
     }
 
     @Provides
-    public ImageController provideImageController() {
-        ImageController imageController = new ImageController();
-        imageController.setRetainViewMode(Controller.RetainViewMode.RETAIN_DETACH);
-        return imageController;
+    @Singleton
+    BindDownloadImageState provideBinder(){
+        return new BindDownloadImageState();
     }
 
 }

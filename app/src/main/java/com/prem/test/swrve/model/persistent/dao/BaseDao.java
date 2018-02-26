@@ -4,10 +4,10 @@ import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 /**
- * Created by prem on 18/02/2018.
+ * Created by prem on 25/02/2018.
  */
 
-public abstract class BaseDao {
+public class BaseDao {
 
     private static Scheduler scheduler;
 
