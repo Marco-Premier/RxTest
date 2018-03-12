@@ -17,7 +17,7 @@ import io.realm.RealmConfiguration;
 public class RxTest extends Application {
 
     //Fields
-    private Context context;
+    private static Context context;
     private static RealmConfiguration realmConfig;
     private static DefaultComponent defaultComponent;
 
@@ -34,6 +34,10 @@ public class RxTest extends Application {
                 .build();
         Realm.setDefaultConfiguration(realmConfig);
 
+    }
+
+    public static Context getContext(){
+        return context;
     }
 
     public static DefaultComponent getDefaultComponent(){

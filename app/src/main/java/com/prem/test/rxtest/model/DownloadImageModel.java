@@ -1,16 +1,15 @@
 package com.prem.test.rxtest.model;
 
-import com.prem.test.rxtest.RxTest;
 import com.prem.test.rxtest.model.action.BaseAction;
 import com.prem.test.rxtest.model.action.CheckUrlAction;
 import com.prem.test.rxtest.model.action.DownloadImageAction;
 import com.prem.test.rxtest.model.action.ShowSearchAction;
+import com.prem.test.rxtest.model.persistent.dao.SearchHistoryDao;
 import com.prem.test.rxtest.model.result.BaseResult;
 import com.prem.test.rxtest.model.result.CheckUrlResult;
 import com.prem.test.rxtest.model.result.DownloadImageResult;
-import com.prem.test.rxtest.network.endpoint.ApiInterface;
 import com.prem.test.rxtest.utils.annotation.validator.EditTextUrlValidator;
-import com.prem.test.rxtest.utils.file.FileManager;
+import com.prem.test.rxtest.utils.file.ImageDownloader;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,13 +26,13 @@ import io.reactivex.schedulers.Schedulers;
 
 public class DownloadImageModel extends BaseModel {
 
-    @Inject EditTextUrlValidator editTextUrlValidator;
-    @Inject ApiInterface apiInterface;
-    @Inject FileManager fileManager;
+    private EditTextUrlValidator editTextUrlValidator;
+    private ImageDownloader imageDownloader;
 
     @Inject
-    public DownloadImageModel(){
-        RxTest.getDefaultComponent().inject(this);
+    public DownloadImageModel(EditTextUrlValidator editTextUrlValidator, ImageDownloader imageDownloader){
+        this.editTextUrlValidator = editTextUrlValidator;
+        this.imageDownloader = imageDownloader;
     }
 
     @Override
@@ -48,16 +47,19 @@ public class DownloadImageModel extends BaseModel {
 
         ObservableTransformer<DownloadImageAction,DownloadImageResult> downloadImage =
                 actions -> actions
-                        .flatMap(action -> apiInterface.downloadFile(action.getUrl()).inter
-                        .flatMap(action -> fileManager.saveToDiskRx(action).subscribeOn(Schedulers.io())
-                                //.flatMap(fileManager.processResponse())
-                                .delay(4, TimeUnit.SECONDS)
-                                //.map(response -> DownloadImageResult.success(response.getPath()))
-                                .map(response -> DownloadImageResult.success("path"))
+                        .doOnNext(action -> {
+                            if(null == action.getIdUrl())
+                                action.setIdUrl(SearchHistoryDao.saveSearchHistory(action.getUrl()));
+                            else
+                                SearchHistoryDao.updateUrl(action.getUrl(), action.getIdUrl());
+                        })
+                        .flatMap(action -> imageDownloader.downloadImage(action)
+                                .subscribeOn(Schedulers.io())
+                                .delay(20, TimeUnit.SECONDS)
+                                .map(bitmap -> DownloadImageResult.success(bitmap))
                                 .onErrorReturn(e -> DownloadImageResult.failure())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                //.startWith(DownloadImageResult.inFlight(action.getUrl(),action.getIdUrl())));
-                                .startWith(DownloadImageResult.inFlight("path",null)));
+                                .startWith(DownloadImageResult.inFlight(action.getUrl(),action.getIdUrl())));
 
         ObservableTransformer<ShowSearchAction,DownloadImageResult> showSearchTransformer =
                 actions -> actions

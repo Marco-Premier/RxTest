@@ -1,5 +1,7 @@
 package com.prem.test.rxtest.model.result;
 
+import android.graphics.Bitmap;
+
 import static com.prem.test.rxtest.model.result.DownloadImageResult.DOWNLOAD_STATUS.FAILURE;
 import static com.prem.test.rxtest.model.result.DownloadImageResult.DOWNLOAD_STATUS.IDLE;
 import static com.prem.test.rxtest.model.result.DownloadImageResult.DOWNLOAD_STATUS.IN_FLIGHT;
@@ -14,7 +16,7 @@ public class DownloadImageResult extends BaseResult {
     public enum DOWNLOAD_STATUS {IDLE, IN_FLIGHT, SUCCESS, FAILURE};
 
     private DOWNLOAD_STATUS downloadStatus;
-    private String imagePaht;
+    private Bitmap bitmap;
     private boolean resetUrlText;
     private Long idUrl;
     private String url;
@@ -34,16 +36,16 @@ public class DownloadImageResult extends BaseResult {
         DownloadImageResult downloadImageResult = new DownloadImageResult(IDLE);
         downloadImageResult.resetUrlText = resetUrlText;
         if(resetUrlText){
-            downloadImageResult.imagePaht = null;
+            downloadImageResult.bitmap = null;
             downloadImageResult.idUrl = null;
             downloadImageResult.url = null;
         }
         return downloadImageResult;
     }
 
-    public static DownloadImageResult success(String path){
+    public static DownloadImageResult success(Bitmap bitmap){
         DownloadImageResult downloadImageResult = new DownloadImageResult(SUCCESS);
-        downloadImageResult.imagePaht = path;
+        downloadImageResult.bitmap = bitmap;
         return downloadImageResult;
     }
 
@@ -55,8 +57,8 @@ public class DownloadImageResult extends BaseResult {
         return downloadStatus;
     }
 
-    public String getImagePaht(){
-        return imagePaht;
+    public Bitmap getBitmap(){
+        return bitmap;
     }
 
     public Long getIdUrl(){

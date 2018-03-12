@@ -3,7 +3,7 @@ package com.prem.test.rxtest.dagger.modules;
 import android.content.Context;
 
 import com.prem.test.rxtest.utils.annotation.validator.EditTextUrlValidator;
-import com.prem.test.rxtest.utils.file.FileManager;
+import com.prem.test.rxtest.utils.file.ImageDownloader;
 
 import dagger.Module;
 import dagger.Provides;
@@ -15,8 +15,8 @@ import dagger.Provides;
 public class UtilsModule {
 
     @Provides
-    FileManager provideFileManager(Context context) {
-        return new FileManager(context);
+    ImageDownloader provideFileManager(Context context) {
+        return new ImageDownloader(context);
     }
 
     @Provides

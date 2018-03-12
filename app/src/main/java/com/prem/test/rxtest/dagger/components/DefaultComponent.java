@@ -12,7 +12,7 @@ import com.prem.test.rxtest.presenter.ImagePresenter;
 import com.prem.test.rxtest.presenter.UrlFormPresenter;
 import com.prem.test.rxtest.presenter.UrlListPresenter;
 import com.prem.test.rxtest.presenter.binders.BindDownloadImageState;
-import com.prem.test.rxtest.utils.file.FileManager;
+import com.prem.test.rxtest.utils.file.ImageDownloader;
 import com.prem.test.rxtest.view.adapter.UrlListViewAdapter;
 import com.prem.test.rxtest.view.controller.UrlListController;
 
@@ -30,7 +30,7 @@ public interface DefaultComponent {
     Context context();
 
     void inject(UrlListViewAdapter urlListViewAdapter);
-    void inject(FileManager fileManager);
+    void inject(ImageDownloader imageDownloader);
     void inject(UrlFormPresenter urlFormPresenter);
     void inject(UrlListPresenter urlListPresenter);
     void inject(ImagePresenter imagePresenter);

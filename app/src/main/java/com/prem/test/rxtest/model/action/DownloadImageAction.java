@@ -22,4 +22,8 @@ public class DownloadImageAction extends BaseAction {
         return idUrl;
     }
 
+    public void setIdUrl(long idUrl){
+        this.idUrl = idUrl;
+    }
+
 }
