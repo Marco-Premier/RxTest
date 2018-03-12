@@ -37,12 +37,6 @@ public class Swrve extends Application {
 
     }
 
-    @Override
-    public void finalize(){
-        //stop location service
-        Log.i("PREM","FINALIZE");
-    }
-
     public static DefaultComponent getDefaultComponent(){
         return defaultComponent;
     }

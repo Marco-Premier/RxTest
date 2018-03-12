@@ -49,7 +49,7 @@ public class DownloadImageModel extends BaseModel {
 
         ObservableTransformer<DownloadImageAction,DownloadImageResult> downloadImage =
                 actions -> actions
-                        //.flatMap(action -> apiInterface.downloadFile(action.getUrl())
+                        .flatMap(action -> apiInterface.downloadFile(action.getUrl()).inter
                         .flatMap(action -> fileManager.saveToDiskRx(action).subscribeOn(Schedulers.io())
                                 //.flatMap(fileManager.processResponse())
                                 .delay(4, TimeUnit.SECONDS)
