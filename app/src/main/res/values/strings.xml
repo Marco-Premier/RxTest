@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Swrve</string>
+    <string name="app_name">RxTest</string>
     <string name="activity_main">Url Form Activity</string>
     <!-- url form view -->
     <string name="ufw_et_url_hint">Insert a valid URL</string>
